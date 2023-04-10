@@ -1,0 +1,47 @@
+version: "3"
+services:
+  # Web service layer
+  nginx:
+    image: nginx:1.23
+    container_name: nginx_web
+    volumes:
+      - "./src:/var/www/html"
+      - "./docker/nginx/nginx.conf:/etc/nginx/nginx.conf"
+    ports:
+      - "80:80"
+    depends_on:
+      - php
+    environment:
+      - TZ=America/Sao_Paulo
+
+  # Application service layer
+  php:
+    build:
+      context: ./docker/php
+    container_name: php_web
+    volumes:
+      - "./src:/var/www/html"
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_USER=ist
+      - POSTGRES_PASSWORD=ist
+      - TZ=America/Sao_Paulo
+
+  # Data persistence service layer
+  postgres:
+    build:
+      context: ./docker/db
+    restart: always
+    container_name: postgres_web
+    volumes:
+      - postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ist
+      POSTGRES_USER: ist
+      TZ: America/Sao_Paulo
+    ports:
+      - 5432:5432
+
+volumes:
+  postgresql:
